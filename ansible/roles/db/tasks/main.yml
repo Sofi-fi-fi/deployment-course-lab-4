@@ -1,0 +1,52 @@
+- name: Install PostgreSQL
+  apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - python3-psycopg2
+    state: present
+
+- name: Ensure PostgreSQL is started and enabled
+  systemd:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Create mywebapp database user
+  become_user: postgres
+  postgresql_user:
+    name: mywebapp
+    password: mywebapp
+    role_attr_flags: NOSUPERUSER,NOCREATEDB,NOCREATEROLE
+    state: present
+
+- name: Create mywebapp database
+  become_user: postgres
+  postgresql_db:
+    name: mywebapp
+    owner: mywebapp
+    state: present
+
+- name: Allow mywebapp user to connect to mywebapp db
+  become_user: postgres
+  postgresql_pg_hba:
+    dest: /etc/postgresql/{{ postgresql_version }}/main/pg_hba.conf
+    contype: host
+    databases: mywebapp
+    users: mywebapp
+    source: 0.0.0.0/0
+    method: md5
+    state: present
+
+- name: Configure PostgreSQL to listen on all interfaces
+  lineinfile:
+    path: /etc/postgresql/{{ postgresql_version }}/main/postgresql.conf
+    regexp: "^#?listen_addresses"
+    line: "listen_addresses = '*'"
+    state: present
+  notify: restart postgresql
+
+- name: Restart PostgreSQL
+  systemd:
+    name: postgresql
+    state: restarted

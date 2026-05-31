@@ -1,0 +1,113 @@
+- name: Install .NET dependencies
+  apt:
+    name:
+      - wget
+      - apt-transport-https
+    state: present
+
+- name: Add Microsoft package repository
+  shell: |
+    wget -q https://packages.microsoft.com/config/ubuntu/22.04/packages-microsoft-prod.deb
+    dpkg -i packages-microsoft-prod.deb
+    rm packages-microsoft-prod.deb
+  args:
+    creates: /etc/apt/sources.list.d/microsoft-prod.list
+
+- name: Update apt cache after adding Microsoft repo
+  apt:
+    update_cache: true
+
+- name: Install dotnet runtime
+  apt:
+    name: dotnet-runtime-10.0
+    state: present
+
+- name: Create app user
+  user:
+    name: app
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Create operator user
+  user:
+    name: operator
+    shell: /bin/bash
+    create_home: true
+    password: "$6$i/gabXU/UrvC20Q5$A7R0XGQcNvLVzoDz12xsV.bqRm4/NGmnf6JkYoznaeTYcKIqvqIxY7EuYBBwK5NVX/o455CMBjYud9X9iDr2M/"
+    password_expire_max: -1
+
+- name: Set operator password expiry
+  command: chage -d 0 operator
+  changed_when: false
+
+- name: Configure operator sudo rules
+  copy:
+    dest: /etc/sudoers.d/operator
+    content: |
+      operator ALL=(ALL) NOPASSWD: /bin/systemctl start mywebapp, \
+                                    /bin/systemctl stop mywebapp, \
+                                    /bin/systemctl restart mywebapp, \
+                                    /bin/systemctl status mywebapp, \
+                                    /bin/systemctl reload nginx
+    mode: "0440"
+    validate: visudo -cf %s
+
+- name: Create app directory
+  file:
+    path: /opt/mywebapp
+    state: directory
+    owner: app
+    group: app
+    mode: "0755"
+
+- name: Create config directory
+  file:
+    path: /etc/mywebapp
+    state: directory
+    mode: "0755"
+
+- name: Copy application files
+  copy:
+    src: "{{ playbook_dir }}/../src/mywebapp/"
+    dest: /opt/mywebapp/
+    owner: app
+    group: app
+    mode: "0755"
+
+- name: Deploy application config from template
+  template:
+    src: config.json.j2
+    dest: /etc/mywebapp/config.json
+    owner: root
+    group: app
+    mode: "0640"
+  notify: restart mywebapp
+
+- name: Deploy mywebapp systemd service
+  copy:
+    dest: /etc/systemd/system/mywebapp.service
+    content: |
+      [Unit]
+      Description=mywebapp Task Tracker
+      After=network.target
+
+      [Service]
+      User=app
+      WorkingDirectory=/opt/mywebapp
+      ExecStart=/opt/mywebapp/mywebapp
+      Restart=on-failure
+
+      [Install]
+      WantedBy=multi-user.target
+    mode: "0644"
+  notify:
+    - daemon reload
+    - restart mywebapp
+
+- name: Enable and start mywebapp
+  systemd:
+    name: mywebapp
+    state: started
+    enabled: true
+    daemon_reload: true

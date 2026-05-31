@@ -1,0 +1,8 @@
+- name: daemon reload
+  systemd:
+    daemon_reload: true
+
+- name: restart mywebapp
+  systemd:
+    name: mywebapp
+    state: restarted

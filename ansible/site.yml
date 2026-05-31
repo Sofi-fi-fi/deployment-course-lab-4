@@ -1,0 +1,18 @@
+- name: Configure all VMs (common setup)
+  hosts: all
+  become: true
+  roles:
+    - common
+
+- name: Configure database VM
+  hosts: db
+  become: true
+  roles:
+    - db
+
+- name: Configure worker VM
+  hosts: workers
+  become: true
+  roles:
+    - webapp
+    - nginx

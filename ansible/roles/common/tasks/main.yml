@@ -1,0 +1,47 @@
+- name: Update apt cache
+  apt:
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Install common packages
+  apt:
+    name:
+      - curl
+      - ca-certificates
+      - sudo
+    state: present
+
+- name: Create teacher user
+  user:
+    name: teacher
+    shell: /bin/bash
+    groups: sudo
+    append: true
+    create_home: true
+    password: "$6$i/gabXU/UrvC20Q5$A7R0XGQcNvLVzoDz12xsV.bqRm4/NGmnf6JkYoznaeTYcKIqvqIxY7EuYBBwK5NVX/o455CMBjYud9X9iDr2M/"
+    password_expire_max: -1
+
+- name: Set teacher password expiry
+  command: chage -d 0 teacher
+  changed_when: false
+
+- name: Create gradebook file
+  copy:
+    dest: /home/student/gradebook
+    content: "13"
+    owner: student
+    group: student
+    mode: "0644"
+  ignore_errors: true
+
+- name: Ensure /home/student exists
+  file:
+    path: /home/student
+    state: directory
+    mode: "0755"
+
+- name: Create gradebook file
+  copy:
+    dest: /home/student/gradebook
+    content: "13"
+    mode: "0644"

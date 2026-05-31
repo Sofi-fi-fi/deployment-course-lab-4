@@ -24,6 +24,8 @@ if "$VBM" list vms | grep -q "\"$VM_NAME\""; then
   sleep 2
 fi
 
+"$VBM" closemedium disk "$BASE_DISK" 2>/dev/null || true
+"$VBM" closemedium disk "$DISK_PATH" 2>/dev/null || true
 rm -f "$DISK_PATH"
 
 echo "==> Cloning base disk..."

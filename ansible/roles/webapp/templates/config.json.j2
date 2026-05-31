@@ -1,0 +1,9 @@
+{
+  "App": {
+    "Interface": "{{ app_interface }}",
+    "Port": "{{ app_port }}"
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "Host={{ hostvars['db']['ansible_host'] }};Port={{ db_port }};Database=mywebapp;Username=mywebapp;Password=mywebapp"
+  }
+}
