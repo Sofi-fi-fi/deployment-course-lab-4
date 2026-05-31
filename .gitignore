@@ -30,6 +30,22 @@ bld/
 # Visual Studio 2015 cache/options directory
 .vs/
 .vagrant/
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.tfstate.lock.info
+
+# VirtualBox & OS Images
+*.vmdk
+*.iso
+*.vbox
+*.vbox-prev
+
+# Cloud-init temporary files
+cloud-init/db/user-data
+cloud-init/db/meta-data
+cloud-init/worker/user-data
+cloud-init/worker/meta-data
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
