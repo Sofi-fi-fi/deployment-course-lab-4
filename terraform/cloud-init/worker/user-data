@@ -1,0 +1,29 @@
+#cloud-config
+
+hostname: worker
+manage_etc_hosts: true
+
+users:
+  - name: ansible
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBbHuS2hb9/UV7sa+UeUp5eVJrv+SwEO5d1M2zvAsqiA sofi@Aorus
+
+  - name: teacher
+    groups: sudo
+    shell: /bin/bash
+    sudo: ALL=(ALL:ALL) ALL
+    lock_passwd: false
+    passwd: "$6$i/gabXU/UrvC20Q5$A7R0XGQcNvLVzoDz12xsV.bqRm4/NGmnf6JkYoznaeTYcKIqvqIxY7EuYBBwK5NVX/o455CMBjYud9X9iDr2M/"
+
+package_update: true
+package_upgrade: false
+
+packages:
+  - curl
+  - ca-certificates
+
+runcmd:
+  - echo "worker ready" > /tmp/cloud-init-done
