@@ -43,13 +43,19 @@
     state: directory
     mode: "0755"
 
-- name: Copy application binary to VM
-  copy:
-    src: /tmp/mywebapp-publish/
+- name: Sync application binary to VM
+  synchronize:
+    src: files/
     dest: /opt/mywebapp/
+    delete: true
+    recursive: true
+
+- name: Fix application ownership
+  file:
+    path: /opt/mywebapp
     owner: app
     group: app
-    mode: preserve
+    recurse: true
 
 - name: Ensure mywebapp binary is executable
   file:
