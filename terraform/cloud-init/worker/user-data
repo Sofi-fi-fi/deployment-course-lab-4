@@ -18,12 +18,19 @@ users:
     lock_passwd: false
     passwd: "$6$i/gabXU/UrvC20Q5$A7R0XGQcNvLVzoDz12xsV.bqRm4/NGmnf6JkYoznaeTYcKIqvqIxY7EuYBBwK5NVX/o455CMBjYud9X9iDr2M/"
 
-package_update: true
+package_update: false
 package_upgrade: false
 
-packages:
-  - curl
-  - ca-certificates
+write_files:
+  - path: /etc/netplan/99-hostonly.yaml
+    content: |
+      network:
+        version: 2
+        ethernets:
+          enp0s8:
+            addresses:
+              - 192.168.56.10/24
 
 runcmd:
+  - netplan apply
   - echo "worker ready" > /tmp/cloud-init-done
