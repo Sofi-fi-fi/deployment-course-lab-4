@@ -46,6 +46,7 @@ cloud-init/db/user-data
 cloud-init/db/meta-data
 cloud-init/worker/user-data
 cloud-init/worker/meta-data
+ansible/roles/webapp/files/
 # Uncomment if you have tasks that create the project's static files in wwwroot
 #wwwroot/
 
